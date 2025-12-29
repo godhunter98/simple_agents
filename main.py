@@ -1,7 +1,7 @@
 import openai
 import os
 from nsepython import nsefetch
-from typing import Any
+from typing import Any,Optional,List,Dict
 import json
 from pydantic import BaseModel, Field
 
@@ -44,7 +44,7 @@ TOOLS = [
 ]
 
 class Agent:
-    def __init__(self, client,system:str="",tools:list = None) -> None :
+    def __init__(self, client,system:str="",tools:Optional[List[Dict[str,Any]]] = None) -> None :
         self.client = client
         self.system = system
         self.messages : list = []
