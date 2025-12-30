@@ -5,24 +5,30 @@ from typing import Any, Optional, List, Dict
 import json
 from pydantic import BaseModel, Field
 
+from dotenv import load_dotenv,find_dotenv
 
-base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+load_dotenv(find_dotenv())
+
+base_url = "https://api.mistral.ai/v1"
+# base_url = "https://generativelanguage.googleapis.com/v1beta/openai/" ##Comment out if using gemini API
 
 
-def fetch_price(symbol: str):
+def fetch_security_data(symbol: str):
     """
-    Get the current price of a security, just pass in the ticker symbol.
+    Get the price, percent_change, pe_ratio and industry for a security, just pass in the ticker symbol.
     """
     try:
         # Get quote from NSE directly
         url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol}"
         data = nsefetch(url)
 
-        price, percent_change = (
+        price, percent_change, pe_ratio,industry = (
             data["priceInfo"]["lastPrice"],
             data["priceInfo"]["pChange"],
+            data['metadata']['pdSymbolPe'],
+            data['info']['industry']
         )
-        return round(price, 2), round(percent_change, 2)
+        return round(price, 2), round(percent_change, 2),pe_ratio,industry
     except Exception as e:
         print(f"Error: {e}")
         return None
@@ -40,12 +46,12 @@ TOOLS = [
         "schema": {
             "type": "function",
             "function": {
-                "name": "fetch_price",
-                "description": "Get the current price of and percent change for a security, just pass in the ticker symbol.",
+                "name": "fetch_security_data",
+                "description": "Get the price, percent_change, pe_ratio and industry for a security, just pass in the ticker symbol.",
                 "parameters": GetFetchPriceArgs.model_json_schema(),
             },
         },
-        "function": fetch_price,
+        "function": fetch_security_data,
     }
 ]
 
@@ -84,7 +90,7 @@ class Agent:
     def execute(self):
         while True:
             completion = self.client.chat.completions.create(
-                model="gemini-2.5-flash",
+                model="mistral-medium-latest",
                 messages=self.messages,
                 tools=self.tools,
                 tool_choice="auto",
@@ -110,8 +116,7 @@ class Agent:
                         exected_output = function_to_call(**function_args)
                         tool_output_content = str(exected_output)
                         print(
-                            f"\nExecuting tool:{function_name} with args {function_args}, Output:{tool_output_content[:500]}"
-                        )  # For Debugging
+                            f"\nExecuting tool:{function_name} with args {function_args}") # For Debugging #, Output:{tool_output_content[:500]}")
 
                         tool_outputs.append(
                             {
@@ -129,7 +134,7 @@ class Agent:
                 return response_message.content
 
 
-client = openai.OpenAI(api_key=os.getenv("GEMINI_API_KEY"), base_url=base_url)
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
 system = "You are helpful AI assistant."
 tools = TOOLS
 agent = Agent(client, system, tools)

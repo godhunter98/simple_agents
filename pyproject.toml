@@ -8,5 +8,6 @@ dependencies = [
     "nsepython>=2.97",
     "openai>=2.14.0",
     "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
     "requests>=2.32.5",
 ]
