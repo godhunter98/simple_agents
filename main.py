@@ -114,9 +114,21 @@ class Agent:
                     if function_name in self.function_map:
                         function_to_call = self.function_map[function_name]
                         exected_output = function_to_call(**function_args)
-                        tool_output_content = str(exected_output)
-                        print(
-                            f"\nExecuting tool:{function_name} with args {function_args}") # For Debugging #, Output:{tool_output_content[:500]}")
+                        
+                        # Format tool output based on function name
+                        if function_name == "fetch_security_data" and exected_output:
+                            price, percent_change, pe_ratio, industry = exected_output
+                            tool_output_content = self._format_security_data(
+                                function_args["symbol"],
+                                price,
+                                percent_change,
+                                pe_ratio,
+                                industry
+                            )
+                        else:
+                            tool_output_content = str(exected_output)
+                        
+                        print(tool_output_content)
 
                         tool_outputs.append(
                             {
@@ -131,7 +143,26 @@ class Agent:
                 self.messages.extend(tool_outputs)
 
             else:
-                return response_message.content
+                # Format the final response with clear structure
+                return self._format_final_response(response_message.content)
+
+    def _format_security_data(
+        self, symbol: str, price: float, percent_change: float, pe_ratio: float, industry: str
+    ) -> str:
+        """Format security data in a readable table format."""
+        header = "=" * 60
+        return f"""\n{header}
+SECURITY DATA FOR: {symbol.upper()}
+{header}
+Price:           ₹{price:,.2f}
+Change:          {percent_change:+.2f}%
+P/E Ratio:       {pe_ratio:.2f}
+Industry:        {industry}
+{header}"""
+
+    def _format_final_response(self, content: str) -> str:
+        """Format the final assistant response with clear structure."""
+        return f"\n{'='*60}\nASSISTANT RESPONSE\n{'='*60}\n{content}\n{'='*60}"""
 
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
@@ -140,7 +171,8 @@ tools = TOOLS
 agent = Agent(client, system, tools)
 
 
-# Example usage
-prompt = str(input("\nEnter your prompt: "))
-response = agent(prompt)
-print("\n" + response)
+# Example usage (only when run as script)
+if __name__ == "__main__":
+    prompt = str(input("\nEnter your prompt: "))
+    response = agent(prompt)
+    print("\n" + response)
