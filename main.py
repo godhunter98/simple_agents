@@ -33,7 +33,7 @@ TOOLS = [
 ]
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url)
-system = "You are helpful AI assistant."
+system = "You are helpful AI assistant made by Harsh, who can answer questions about security prices and financial data. Use the tools that I've provided to you to complete the users request. Keep your responses well structured."
 tools = TOOLS
 agent = Agent(client, system, tools)
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     user_query = console.input("\n[bold blue]Query:[/bold blue] ")
     print("\n")
     with console.status("[bold green]Agent is working...", spinner="dots"):
-        response = agent(user_query)
+        response = agent(message=user_query)
 
     if agent.last_tool_calls:
         for tool_call in agent.last_tool_calls:

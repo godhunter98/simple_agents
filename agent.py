@@ -32,14 +32,10 @@ class Agent:
 
         final_assistant_content = self.execute()
 
-        if message:
-            self.messages.append(
-                {"role": "assistant", "content": final_assistant_content}
-            )
-
         return final_assistant_content
 
     def execute(self):
+        # Clearing any previous tool calls
         self.last_tool_calls = []
 
         while True:
@@ -66,26 +62,18 @@ class Agent:
                     )
 
                     # Capturing tool information for logging
-                    self.last_tool_calls.append({
-                        "function_name":function_name,
-                        "arguments":raw_args,
-                        "tool_call_id":tool_call.id,
-                    })
+                    self.last_tool_calls.append(
+                        {
+                            "function_name": function_name,
+                            "arguments": raw_args,
+                            "tool_call_id": tool_call.id,
+                        }
+                    )
 
                     if function_name in self.function_map:
                         function_to_call = self.function_map[function_name]
                         exected_output = function_to_call(**function_args)
-
-                        # Format tool output (plain, no formatting)
-                        if function_name == "fetch_security_data" and exected_output:
-                            price, percent_change, pe_ratio, industry = exected_output
-                            tool_output_content = f"Price: ₹{price:.2f}, Change: {percent_change:+.2f}%, P/E: {pe_ratio:.2f}, Industry: {industry}"
-                        else:
-                            tool_output_content = str(exected_output)
-
-                        # Only print tool output if debug mode is enabled
-                        if self.debug:
-                            print(tool_output_content)
+                        tool_output_content = str(exected_output)
 
                         tool_outputs.append(
                             {
