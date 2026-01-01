@@ -13,14 +13,10 @@ A lightweight, modular agent framework for building AI assistants with tool inte
 ## Installation
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
-Or install dependencies directly:
-
-```bash
-pip install nsepython openai pydantic python-dotenv requests
-```
+This will automatically create a virtual environment and install all dependencies from `pyproject.toml`.
 
 ## Setup
 
@@ -30,20 +26,34 @@ pip install nsepython openai pydantic python-dotenv requests
 echo "OPENAI_API_KEY=your_api_key_here" > .env
 ```
 
-2. The agent is configured to use Mistral AI by default. To switch to Gemini API, uncomment the relevant line in `main.py`.
+2. The agent is configured to use Mistral AI by default. To switch to Gemini API, modify the `base_url` in `main.py`.
 
 ## Usage
 
 Run the agent:
 
 ```bash
-python main.py
+uv run main.py
 ```
 
 Then enter your query when prompted. The agent will:
 1. Process your query
 2. Call any necessary tools
 3. Generate a response
+
+### Using an Alias (Optional)
+
+For convenience, add this to your shell config:
+
+```bash
+alias agent="uv run main.py"
+```
+
+Then you can simply run:
+
+```bash
+agent
+```
 
 ## Tools
 
@@ -116,6 +126,7 @@ agents/
 ├── tools.py          # Tool definitions
 ├── formatting.py     # Output formatting utilities
 ├── pyproject.toml    # Project configuration
+├── uv.lock           # Dependency lock file
 └── .env              # Environment variables (not committed)
 ```
 
@@ -135,13 +146,8 @@ Price: ₹1,234.56, Change: +1.23%, P/E: 24.56, Industry: Information Technology
 
 ## Dependencies
 
-- **nsepython**: For fetching Indian stock market data
-- **openai**: For Mistral AI API integration
-- **pydantic**: For data validation and schema generation
-- **python-dotenv**: For environment variable management
-- **requests**: For HTTP requests
-- **rich**: For beautiful console output (optional, used in main.py)
+All dependencies are listed in `pyproject.toml` and will be installed automatically with `uv sync`.
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License
