@@ -1,33 +1,20 @@
-name: test_db
+name: agents_db
 
 services:
   db:
-    image: pgvector/pgvector:pg17-bookworm
-    container_name: pgvector_db
+    image: postgres:18
+    container_name: agents_db
     restart: always
     environment:
-      - POSTGRES_DB=vectordb
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=agents
+      - POSTGRES_USER=agents
+      - POSTGRES_PASSWORD=agents
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    # shm_size removed; defaults to 64MB
-  app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-
-    container_name: simple_agent
-    depends_on:
-      - db
-    stdin_open: true
-    tty: true
-    environment:
-      - PYTHONUNBUFFERED=1
+      - agents_db:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  agents_db:
 
 
