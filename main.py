@@ -1,3 +1,4 @@
+import sys
 import openai
 import os
 from dotenv import load_dotenv, find_dotenv
@@ -38,7 +39,14 @@ tools = TOOLS
 agent = Agent(client, system, tools)
 
 
+
 if __name__ == "__main__":
+    # Ensure stdin is ready for interactive input
+    if not sys.stdin.isatty():
+        console.print("[bold red]Error:[/bold red] This app requires an interactive terminal.")
+        console.print("Run with: [bold cyan]docker compose run --rm app[/bold cyan]")
+        sys.exit(1)
+    
     user_query = console.input("\n[bold blue]Query:[/bold blue] ")
     print("\n")
     with console.status("[bold green]Agent is working...", spinner="dots"):
