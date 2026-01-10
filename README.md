@@ -65,14 +65,14 @@ agent
 
 To add a new tool:
 
-1. Define the tool function in `tools.py`
+1. Define the tool function in `core/tools.py`
 2. Create a Pydantic model for the arguments
 3. Add the tool to the `TOOLS` list in `main.py`
 
 Example:
 
 ```python
-# In tools.py
+# In core/tools.py
 def my_new_tool(param1: str, param2: int):
     # Implementation
     return result
@@ -101,7 +101,7 @@ TOOLS.append({
 
 ### Debug Mode
 
-Enable debug mode in `agent.py`:
+Enable debug mode in `main.py`:
 
 ```python
 agent = Agent(client, system, tools, debug=True)
@@ -121,13 +121,20 @@ system = "You are a helpful AI assistant specialized in X, Y, Z."
 
 ```
 agents/
-├── agent.py          # Core agent logic
-├── main.py           # Entry point and configuration
-├── tools.py          # Tool definitions
-├── formatting.py     # Output formatting utilities
-├── pyproject.toml    # Project configuration
-├── uv.lock           # Dependency lock file
-└── .env              # Environment variables (not committed)
+├── main.py                  # Entry point and configuration
+├── core/
+│   ├── agent.py             # Core agent logic
+│   └── tools.py             # Tool definitions
+├── app/
+│   └── execution_builder.py # Application logic
+├── presentation/
+│   ├── cli_renderer.py      # CLI output rendering
+│   └── formatting.py        # Formatting utilities
+├── domain/
+│   └── models.py            # Data models
+├── pyproject.toml           # Project configuration
+├── uv.lock                  # Dependency lock file
+└── .env                     # Environment variables (not committed)
 ```
 
 ## Examples
