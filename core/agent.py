@@ -6,9 +6,9 @@ class Agent:
     def __init__(
         self,
         client,
-        model: str = 'mistral-medium-latest',
         system: str = "",
         tools: Optional[List[Dict[str, Any]]] = None,
+        model: str = 'mistral-medium-latest',
         debug: bool = False,
     ) -> None:
         self.client = client
