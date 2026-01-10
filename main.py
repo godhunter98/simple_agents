@@ -65,8 +65,13 @@ if __name__ == "__main__":
         query=user_query,
         response=response,
         agent_name="finance_agent",
-        model=None,
+        model=agent.model,
         raw_tool_calls=agent.last_tool_calls,
     )
-    
+
     render_response(response)
+
+    # For debugging
+    print(execution)
+    print(render_tool_calls(agent.last_tool_calls))
+    

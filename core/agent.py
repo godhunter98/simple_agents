@@ -6,12 +6,14 @@ class Agent:
     def __init__(
         self,
         client,
+        model: str = 'mistral-medium-latest',
         system: str = "",
         tools: Optional[List[Dict[str, Any]]] = None,
         debug: bool = False,
     ) -> None:
         self.client = client
         self.system = system
+        self.model = model
         self.messages: list = []
         self.debug = debug  # Control whether to show tool call details
         self.last_tool_calls: list[dict] = []
@@ -40,7 +42,7 @@ class Agent:
 
         while True:
             completion = self.client.chat.completions.create(
-                model="mistral-medium-latest",
+                model=self.model,
                 messages=self.messages,
                 tools=self.tools,
                 tool_choice="auto",
