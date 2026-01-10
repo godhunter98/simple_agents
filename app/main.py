@@ -5,12 +5,12 @@ from dotenv import load_dotenv, find_dotenv
 from tools import GetFetchPriceArgs, fetch_security_data
 from agent import Agent
 from rich.console import Console
-from rich.panel import Panel
-from rich.markdown import Markdown
-from datetime import datetime
 import time
+from app.execution_builder import build_execution
+from cli_renderer import render_tool_calls, render_response
 
 
+# load env variables
 load_dotenv(find_dotenv())
 
 console = Console()
@@ -53,25 +53,20 @@ if __name__ == "__main__":
         response = agent(message=user_query)
 
     if agent.last_tool_calls:
-        for tool_call in agent.last_tool_calls:
-            console.print(
-                Panel(
-                    f"[bold blue]Tool Called:[/bold blue] [bold magenta]{tool_call['function_name']}[/bold magenta]\n\n"
-                    f"[bold green]Arguments:[/bold green] {tool_call['arguments']}\n\n"
-                    f"[bold yellow]Time:[/bold yellow] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                    title="Tool Execution",
-                    border_style="bright_blue",
-                )
-            )
-        time.sleep(0.5)
+        render_tool_calls(agent.last_tool_calls)
+    
 
     with console.status("[bold cyan]Generating response...", spinner="dots") as status:
         time.sleep(1) 
 
-    console.print(
-        Panel(
-            Markdown(response),
-            title="Assistant Response",
-            border_style="bright_magenta",
-        )
+    # for logging to db
+
+    execution = build_execution(
+        query=user_query,
+        response=response,
+        agent_name="finance_agent",
+        model=None,
+        raw_tool_calls=agent.last_tool_calls,
     )
+    
+    render_response(response)

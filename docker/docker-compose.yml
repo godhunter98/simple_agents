@@ -11,8 +11,9 @@ services:
       - POSTGRES_PASSWORD=agents
     ports:
       - "5432:5432"
+    #Need to make changes to volume path for pg18 
     volumes:
-      - agents_db:/var/lib/postgresql/data
+      - agents_db:/var/lib/postgresql
 
 volumes:
   agents_db:
