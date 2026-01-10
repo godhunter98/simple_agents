@@ -2,12 +2,12 @@ import sys
 import openai
 import os
 from dotenv import load_dotenv, find_dotenv
-from tools import GetFetchPriceArgs, fetch_security_data
-from agent import Agent
+from core.tools import GetFetchPriceArgs, fetch_security_data
+from core.agent import Agent
 from rich.console import Console
 import time
 from app.execution_builder import build_execution
-from cli_renderer import render_tool_calls, render_response
+from presentation.cli_renderer import render_tool_calls, render_response
 
 
 # load env variables
