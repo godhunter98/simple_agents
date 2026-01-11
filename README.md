@@ -7,6 +7,7 @@ A lightweight, modular agent framework for building AI assistants with tool inte
 - **Modular Architecture**: Easy to add and manage tools
 - **Mistral AI Integration**: Uses Mistral's API for powerful AI responses
 - **Tool Calling**: Supports function calling for external data fetching
+- **Execution Logging**: Persists agent executions and tool calls to PostgreSQL
 - **Rich Output Formatting**: Beautiful console output with Rich library
 - **Debug Mode**: Optional debug information for development
 
@@ -26,7 +27,39 @@ This will automatically create a virtual environment and install all dependencie
 echo "OPENAI_API_KEY=your_api_key_here" > .env
 ```
 
-2. The agent is configured to use Mistral AI by default. To switch to Gemini API, modify the `base_url` in `main.py`.
+2. Set up PostgreSQL database credentials in `.env`:
+
+```bash
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=agents
+POSTGRES_USER=agents
+POSTGRES_PASSWORD=agents
+```
+
+3. Create the required database tables:
+
+```sql
+CREATE TABLE agent_executions (
+    id UUID PRIMARY KEY,
+    query TEXT NOT NULL,
+    response TEXT NOT NULL,
+    agent_name VARCHAR(255) NOT NULL,
+    model VARCHAR(255),
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE tool_calls (
+    id UUID PRIMARY KEY,
+    execution_id UUID REFERENCES agent_executions(id),
+    tool_name VARCHAR(255) NOT NULL,
+    arguments JSONB NOT NULL,
+    call_order INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+```
+
+4. The agent is configured to use Mistral AI by default. To switch to Gemini API, modify the `base_url` in `main.py`.
 
 ## Usage
 
@@ -126,7 +159,9 @@ agents/
 │   ├── agent.py             # Core agent logic
 │   └── tools.py             # Tool definitions
 ├── app/
-│   └── execution_builder.py # Application logic
+│   └── execution_builder.py # Builds execution objects from raw data
+├── infrastructure/
+│   └── db.py                # Database persistence layer
 ├── presentation/
 │   ├── cli_renderer.py      # CLI output rendering
 │   └── formatting.py        # Formatting utilities
