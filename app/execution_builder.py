@@ -1,11 +1,10 @@
 from datetime import datetime
 from typing import List
 import json
-
 from domain.models import AgentExecution, ToolCall
+from uuid import UUID
 
-
-def build_tool_calls(raw_tool_calls: list[dict]) -> List[ToolCall]:
+def build_tool_calls(raw_tool_calls: list[dict], execution_id: UUID) -> List[ToolCall]:
     tool_calls: List[ToolCall] = []
 
     for idx, raw_call in enumerate(raw_tool_calls or []):
@@ -16,6 +15,7 @@ def build_tool_calls(raw_tool_calls: list[dict]) -> List[ToolCall]:
 
         tool_calls.append(
             ToolCall(
+                execution_id=execution_id,
                 tool_name=raw_call["function_name"],
                 arguments=args,
                 call_order=idx + 1,
@@ -33,12 +33,13 @@ def build_execution(
     agent_name: str,
     model: str | None,
     raw_tool_calls: list[dict],
-) -> AgentExecution:
-    return AgentExecution(
+    ) -> AgentExecution:
+    execution = AgentExecution(
         query=query,
         response=response,
         agent_name=agent_name,
         model=model,
-        tool_calls=build_tool_calls(raw_tool_calls),
         created_at=datetime.utcnow(),
     )
+    execution.tool_calls = build_tool_calls(raw_tool_calls,execution_id = execution.id)
+    return execution

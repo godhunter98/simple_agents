@@ -8,7 +8,7 @@ from rich.console import Console
 import time
 from app.execution_builder import build_execution
 from presentation.cli_renderer import render_tool_calls, render_response
-
+from infrastructure.db import persist_execution
 
 # load env variables
 load_dotenv(find_dotenv())
@@ -60,7 +60,6 @@ if __name__ == "__main__":
         time.sleep(1) 
 
     # for logging to db
-
     execution = build_execution(
         query=user_query,
         response=response,
@@ -68,6 +67,8 @@ if __name__ == "__main__":
         model=agent.model,
         raw_tool_calls=agent.last_tool_calls,
     )
+
+    persist_execution(execution)    
 
     render_response(response)
 
