@@ -3,7 +3,7 @@ import os
 import psycopg
 import psycopg.rows
 from domain.models import AgentExecution, ToolCall
-import UUID
+from uuid import UUID
 
 def get_connection():
     return psycopg.connect(
@@ -12,6 +12,7 @@ def get_connection():
         dbname=os.getenv("POSTGRES_DB", "agents"),
         user=os.getenv("POSTGRES_USER", "agents"),
         password=os.getenv("POSTGRES_PASSWORD", "agents"),
+        row_factory=psycopg.rows.dict_row,
     )
 
 def persist_execution(execution: AgentExecution) -> None:
@@ -89,7 +90,7 @@ def get_tool_calls_for_execution(execution_id:UUID) -> List[ToolCall]:
                     FROM tool_calls WHERE execution_id = %s
                     ORDER BY call_order ASC
                 ''',
-                (execution_id)
+                (execution_id,)
             )
 
             rows = cursor.fetchall()
@@ -133,7 +134,7 @@ def get_execution_by_id(execution_id:UUID) -> AgentExecution | None:
                     created_at
                 FROM agent_executions WHERE ID = %s
                 ''',
-                (execution_id)
+                (execution_id,)
             )
 
             row = cursor.fetchone()         
