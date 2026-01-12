@@ -12,7 +12,6 @@ def get_connection():
         dbname=os.getenv("POSTGRES_DB", "agents"),
         user=os.getenv("POSTGRES_USER", "agents"),
         password=os.getenv("POSTGRES_PASSWORD", "agents"),
-        row_factory=psycopg.rows.dict_row,
     )
 
 def persist_execution(execution: AgentExecution) -> None:
@@ -23,7 +22,7 @@ def persist_execution(execution: AgentExecution) -> None:
     conn = get_connection()
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
             
             # 1. Insert agent execution
             cursor.execute(
@@ -76,7 +75,7 @@ def get_tool_calls_for_execution(execution_id:UUID) -> List[ToolCall]:
     conn = get_connection()
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
 
             cursor.execute(
                 '''
