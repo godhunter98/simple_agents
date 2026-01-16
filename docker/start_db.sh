@@ -42,7 +42,7 @@ fi; echo "Volume already exists."
 # finally start the db
 echo ""
 echo ""
-echo "🚀 Starting Postgres via Docker Compose..."
+echo "🐘 Starting Postgres via Docker Compose..."
 docker compose up -d
 
 echo "✅ Postgres is running."
