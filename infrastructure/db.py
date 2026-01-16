@@ -120,7 +120,7 @@ def get_execution_by_id(execution_id:UUID) -> AgentExecution | None:
     conn = get_connection()
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
 
             cursor.execute(
                 '''
