@@ -158,4 +158,46 @@ def get_execution_by_id(execution_id:UUID) -> AgentExecution | None:
     finally:
         conn.close()
 
-print(get_execution_by_id(UUID('7ee90d67-43bd-4ae4-86b8-04fd3f42958d')))
+def list_executions(limit:int = 20, offset:int = 0):
+    conn = get_connection()
+    
+    try:
+        with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
+            cursor.execute(
+                '''
+                SELECT 
+                    id, 
+                    query, 
+                    response, 
+                    agent_name, 
+                    model, 
+                    created_at
+                FROM agent_executions
+                ORDER by created_at DESC
+                LIMIT %s OFFSET %s
+                ''',
+                (limit,offset)
+            )
+            rows = cursor.fetchall()
+ 
+            return [
+                AgentExecution(
+                id=row["id"],
+                query=row["query"],
+                response=row["response"],
+                agent_name=row["agent_name"],
+                model=row["model"],
+                created_at=row["created_at"],
+                tool_calls=[],
+                ) for row in rows
+            ]
+    finally:
+        conn.close()     
+
+def list_recent_executions(n:int = 10):
+    return list_executions(limit=n)
+
+output = list_recent_executions(10)
+
+# comment out when debugging
+# [print(executions.query) for executions in output]

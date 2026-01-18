@@ -12,7 +12,10 @@ if ! command -v docker &> /dev/null; then
   brew install --cask docker
   echo "Successfully installed Docker"
   sleep 5
-fi; echo "Docker is already installed."
+else
+  echo "Docker is already installed." 
+fi; 
+
 
 
 # check if docker is running
@@ -25,8 +28,10 @@ if ! docker info &> /dev/null; then
   until docker info &> /dev/null; do
     sleep 2
   done
+else
+  echo "Docker daemon is running." 
 fi; 
-echo "Docker daemon is running."
+
 echo ""
 
 docker ps
@@ -37,7 +42,9 @@ echo "Checking if a volume exists for our db..."
 if ! docker volume inspect agents_db_agents_db &> /dev/null; then
   echo "Volume agents_db_agents_db does not exist!"
   exit 1
-fi; echo "Volume already exists."
+else
+  echo "Volume already exists."
+fi; 
 
 # finally start the db
 echo ""
