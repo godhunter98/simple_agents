@@ -2,7 +2,7 @@ name: agents_db
 
 services:
   db:
-    image: postgres:18
+    image: pgvector/pgvector:pg18 #Updated image to use vector db extensions
     container_name: agents_db
     restart: always
     environment:
