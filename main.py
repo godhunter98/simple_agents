@@ -2,7 +2,7 @@ import sys
 import openai
 import os
 from dotenv import load_dotenv, find_dotenv
-from core.tools import GetFetchPriceArgs, fetch_security_data
+from core.tools import fetch_security_data_args, fetch_security_data
 from core.agent import Agent
 from rich.console import Console
 import time
@@ -26,7 +26,7 @@ TOOLS = [
             "function": {
                 "name": "fetch_security_data",
                 "description": "Get the price, percent_change, pe_ratio and industry for a security, just pass in the ticker symbol.",
-                "parameters": GetFetchPriceArgs.model_json_schema(),
+                "parameters": fetch_security_data_args.model_json_schema(),
             },
         },
         "function": fetch_security_data,

@@ -154,6 +154,7 @@ def get_execution_by_id(execution_id: UUID) -> AgentExecution | None:
                 tool_calls=[],
             )
 
+            # Once you have execution id, you can fetch all tool_calls invoked in that execution
             execution.tool_calls = get_tool_calls_for_execution(execution.id)
 
             return execution

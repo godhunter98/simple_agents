@@ -4,6 +4,8 @@ import json
 from domain.models import AgentExecution, ToolCall
 from uuid import UUID
 
+# We want to convert every raw LLM Execution output into Pydantic Model Instances
+
 def build_tool_calls(raw_tool_calls: list[dict], execution_id: UUID) -> List[ToolCall]:
     tool_calls: List[ToolCall] = []
 
@@ -25,7 +27,7 @@ def build_tool_calls(raw_tool_calls: list[dict], execution_id: UUID) -> List[Too
 
     return tool_calls
 
-
+# At the time of creating an execution, we also create the tool_calls, as they're a part of that execution state
 def build_execution(
     *,
     query: str,
@@ -41,5 +43,5 @@ def build_execution(
         model=model,
         created_at=datetime.utcnow(),
     )
-    execution.tool_calls = build_tool_calls(raw_tool_calls,execution_id = execution.id)
+    execution.tool_calls = build_tool_calls(raw_tool_calls,execution_id = execution.id) #tool_calls can't exist without agent execution
     return execution
