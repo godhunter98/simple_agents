@@ -1,14 +1,21 @@
 """
 Repository for Document and DocumentChunk database operations.
 """
+from transformers.models.esm.openfold_utils.chunk_utils import chunk_layer
+from torch.fx.experimental.symbolic_shapes import Int
 from typing import List
 from uuid import UUID
-
+from typing import TypedDict
 import psycopg
 import psycopg.rows
+from dataclasses import dataclass
 
 from infrastructure.connection import get_connection
 
+@dataclass
+class ChunkRow(TypedDict):
+    id: UUID
+    content: str
 
 def persist_document(source: str, title: str | None = None, metadata: dict | None = None) -> UUID:
     """
@@ -180,6 +187,46 @@ def get_chunks_for_document(document_id: UUID) -> List[dict]:
     finally:
         conn.close()
 
+def get_chunks_without_embeddings(limit:int) ->List[ChunkRow]:
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('''
+            SELECT id, content
+                FROM document_chunks
+                WHERE embedding is NULL
+                ORDER BY created_at
+                LIMIT %s
+            ''',
+            (limit,))
+            return cursor.fetchall()
+    except Exception as e:
+        conn.rollback()
+        raise e
+
+    finally:
+        conn.close()
+
+def update_chunks_embeddings(chunk_id:UUID,embedding:list[float])->None:
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('''
+            UPDATE document_chunks
+            SET embeddings = %s
+            WHERE id = %s
+            ''',
+            (embedding,chunk_id))
+            conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+
+    finally:
+        conn.close()
 
 def list_documents(limit: int = 20, offset: int = 0) -> List[dict]:
     """
