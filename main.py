@@ -7,8 +7,10 @@ from core.agent import Agent
 from rich.console import Console
 import time
 from app.execution_builder import build_execution
+from app.rag.context_builder import build_rag_message
 from presentation.cli_renderer import render_tool_calls, render_response
 from infrastructure.db import persist_execution
+
 
 # load env variables
 load_dotenv(find_dotenv())
@@ -48,9 +50,11 @@ if __name__ == "__main__":
         sys.exit(1)
     
     user_query = console.input("\n[bold blue]Query:[/bold blue] ")
+    rag_message = build_rag_message(user_query)
+
     print("\n")
     with console.status("[bold green]Agent is working...", spinner="dots"):
-        response = agent(message=user_query)
+        response = agent(message=rag_message['content'])
 
     if agent.last_tool_calls:
         render_tool_calls(agent.last_tool_calls)

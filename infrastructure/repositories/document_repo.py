@@ -1,8 +1,6 @@
 """
 Repository for Document and DocumentChunk database operations.
 """
-from transformers.models.esm.openfold_utils.chunk_utils import chunk_layer
-from torch.fx.experimental.symbolic_shapes import Int
 from typing import List
 from uuid import UUID
 from typing import TypedDict
@@ -191,7 +189,7 @@ def get_chunks_without_embeddings(limit:int) ->List[ChunkRow]:
     conn = get_connection()
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
             cursor.execute('''
             SELECT id, content
                 FROM document_chunks
@@ -212,10 +210,10 @@ def update_chunks_embeddings(chunk_id:UUID,embedding:list[float])->None:
     conn = get_connection()
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
             cursor.execute('''
             UPDATE document_chunks
-            SET embeddings = %s
+            SET embedding = %s
             WHERE id = %s
             ''',
             (embedding,chunk_id))

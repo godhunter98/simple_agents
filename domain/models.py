@@ -22,4 +22,9 @@ class AgentExecution(BaseModel):
     tool_calls: List[ToolCall] = Field(default_factory=list)
     created_at: datetime 
 
-
+class DocumentChunk(BaseModel):
+    id : UUID = Field(default_factory=uuid4)
+    document_id : UUID = Field(default_factory=uuid4)
+    content: str
+    embedding: Optional[list[float]] = None
+    

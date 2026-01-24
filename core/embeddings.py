@@ -10,9 +10,9 @@ client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"),base_url = "https://a
 # This model will geneate an emebddigs of dim 1024
 EMBEDDING_MODEL = "mistral-embed"
 
-def embed_text(text: str) -> List[float]:
+def embed_text(text: str,embedding_model:str=EMBEDDING_MODEL) -> List[float]:
     response = client.embeddings.create(
-        model=EMBEDDING_MODEL,
+        model=embedding_model,
         input=text,
     )
     return response.data[0].embedding
