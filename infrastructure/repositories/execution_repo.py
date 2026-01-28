@@ -7,7 +7,7 @@ from uuid import UUID
 import psycopg
 import psycopg.rows
 
-from domain.models import AgentExecution, ToolCall
+from domain.models.models import AgentExecution, ToolCall
 from infrastructure.connection import get_connection
 
 
