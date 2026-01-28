@@ -5,7 +5,7 @@ from uuid import UUID
 from core.embeddings import embed_text
 import psycopg
 import psycopg.rows
-from domain.models import DocumentChunk
+from domain.models.models import DocumentChunk
 from infrastructure.connection import get_connection
 
 

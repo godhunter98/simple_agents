@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 import json
-from domain.models import AgentExecution, ToolCall
+from domain.models.models import AgentExecution, ToolCall
 from uuid import UUID
 
 # We want to convert every raw LLM Execution output into Pydantic Model Instances
