@@ -11,3 +11,8 @@ wheels/
 
 # Env Files
 .env
+
+# dev_files
+creating_tables.py
+tests/
+read.md

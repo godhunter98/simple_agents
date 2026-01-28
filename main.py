@@ -1,15 +1,18 @@
+import sys
 import openai
 import os
 from dotenv import load_dotenv, find_dotenv
-from tools import GetFetchPriceArgs, fetch_security_data
-from agent import Agent
+from core.tools import fetch_security_data_args, fetch_security_data
+from core.agent import Agent
 from rich.console import Console
-from rich.panel import Panel
-from rich.markdown import Markdown
-from datetime import datetime
 import time
+from app.execution_builder import build_execution
+from app.rag.context_builder import build_rag_message
+from presentation.cli_renderer import render_tool_calls, render_response
+from infrastructure.db import persist_execution
 
 
+# load env variables
 load_dotenv(find_dotenv())
 
 console = Console()
@@ -25,7 +28,7 @@ TOOLS = [
             "function": {
                 "name": "fetch_security_data",
                 "description": "Get the price, percent_change, pe_ratio and industry for a security, just pass in the ticker symbol.",
-                "parameters": GetFetchPriceArgs.model_json_schema(),
+                "parameters": fetch_security_data_args.model_json_schema(),
             },
         },
         "function": fetch_security_data,
@@ -38,32 +41,42 @@ tools = TOOLS
 agent = Agent(client, system, tools)
 
 
+
 if __name__ == "__main__":
+    # Ensure stdin is ready for interactive input
+    if not sys.stdin.isatty():
+        console.print("[bold red]Error:[/bold red] This app requires an interactive terminal.")
+        console.print("Run with: [bold cyan]docker compose run --rm app[/bold cyan]")
+        sys.exit(1)
+    
     user_query = console.input("\n[bold blue]Query:[/bold blue] ")
+    rag_message = build_rag_message(user_query)
+
     print("\n")
     with console.status("[bold green]Agent is working...", spinner="dots"):
-        response = agent(message=user_query)
+        response = agent(message=rag_message['content'])
 
     if agent.last_tool_calls:
-        for tool_call in agent.last_tool_calls:
-            console.print(
-                Panel(
-                    f"[bold blue]Tool Called:[/bold blue] [bold magenta]{tool_call['function_name']}[/bold magenta]\n\n"
-                    f"[bold green]Arguments:[/bold green] {tool_call['arguments']}\n\n"
-                    f"[bold yellow]Time:[/bold yellow] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                    title="Tool Execution",
-                    border_style="bright_blue",
-                )
-            )
-        time.sleep(0.5)
+        render_tool_calls(agent.last_tool_calls)
+    
 
     with console.status("[bold cyan]Generating response...", spinner="dots") as status:
         time.sleep(1) 
 
-    console.print(
-        Panel(
-            Markdown(response),
-            title="Assistant Response",
-            border_style="bright_magenta",
-        )
+    # for logging to db
+    execution = build_execution(
+        query=user_query,
+        response=response,
+        agent_name="finance_agent",
+        model=agent.model,
+        raw_tool_calls=agent.last_tool_calls,
     )
+
+    persist_execution(execution)    
+
+    render_response(response)
+
+    # For debugging
+    print(execution)
+    print(render_tool_calls(agent.last_tool_calls))
+    

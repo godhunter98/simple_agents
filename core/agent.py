@@ -8,10 +8,12 @@ class Agent:
         client,
         system: str = "",
         tools: Optional[List[Dict[str, Any]]] = None,
+        model: str = 'mistral-medium-latest',
         debug: bool = False,
     ) -> None:
         self.client = client
         self.system = system
+        self.model = model
         self.messages: list = []
         self.debug = debug  # Control whether to show tool call details
         self.last_tool_calls: list[dict] = []
@@ -30,9 +32,9 @@ class Agent:
         if message:
             self.messages.append({"role": "user", "content": message})
 
-        final_assistant_content = self.execute()
+        final_output:dict[str|None] = self.execute()
 
-        return final_assistant_content
+        return final_output
 
     def execute(self):
         # Clearing any previous tool calls
@@ -40,7 +42,7 @@ class Agent:
 
         while True:
             completion = self.client.chat.completions.create(
-                model="mistral-medium-latest",
+                model=self.model,
                 messages=self.messages,
                 tools=self.tools,
                 tool_choice="auto",
@@ -55,6 +57,7 @@ class Agent:
                 for tool_call in response_message.tool_calls:
                     function_name = tool_call.function.name
                     raw_args = tool_call.function.arguments
+                    # This handles the edge case where different LLM providers return args in different formats
                     function_args = (
                         raw_args
                         if isinstance(raw_args, dict)
